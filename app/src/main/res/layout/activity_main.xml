@@ -15,7 +15,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="APP NAME GOES HERE"
-        android:textSize="25dp"
+        android:textSize="20dp"
         android:textColor="#fff">
     </TextView>
 </LinearLayout>

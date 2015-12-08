@@ -5,6 +5,7 @@ import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ListActivity;
 import android.net.TrafficStats;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -15,20 +16,29 @@ import java.util.List;
 
 public class MainActivity extends ListActivity {
 
-    @Override
+    private static final String TAG = MainActivity.class.getSimpleName();
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         //Get running process
         ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
         List<RunningAppProcessInfo> runningProcesses = manager.getRunningAppProcesses();
+
         if (runningProcesses != null && runningProcesses.size() > 0) {
             // Set data to the list adapter
+            Log.d(TAG, "Current processes number" + runningProcesses.size());
             setListAdapter(new ListAdapter(this, runningProcesses));
         } else {
             // In case there are no processes running
             Toast.makeText(getApplicationContext(), "No application is running", Toast.LENGTH_LONG).show();
         }
+
+        List<ActivityManager.RunningServiceInfo> runningServiceInfos = manager.getRunningServices(Integer.MAX_VALUE);
+        Log.d(TAG, "running services : " + runningServiceInfos.size());
+        for (ActivityManager.RunningServiceInfo rsi: runningServiceInfos) {
+            Log.d(TAG, "Service pid: " + rsi.pid);
+        }
+
     }
 
     @Override
@@ -37,6 +47,10 @@ public class MainActivity extends ListActivity {
         long received    = 0;
         // Get UID of the selected process
         int uid = ((RunningAppProcessInfo)getListAdapter().getItem(position)).uid;
+        int pid = ((RunningAppProcessInfo)getListAdapter().getItem(position)).pid;
+
+        Log.d(TAG, "on click");
+        Log.d(TAG, "This pid: " + pid);
 
         // Get traffic data
         received = TrafficStats.getUidRxBytes(uid);
