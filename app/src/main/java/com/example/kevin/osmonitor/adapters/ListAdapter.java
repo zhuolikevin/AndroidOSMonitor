@@ -16,13 +16,13 @@ import java.util.List;
 /**
  * Created by Kevin on 12/7/15.
  */
-public class ListAdapter extends ArrayAdapter<RunningAppProcessInfo> {
+public class ListAdapter extends ArrayAdapter<String> {
     // List context
     private final Context context;
     // List values
-    private final List<RunningAppProcessInfo> values;
+    private final List<String> values;
 
-    public ListAdapter(Context context, List<RunningAppProcessInfo> values) {
+    public ListAdapter(Context context, List<String> values) {
         super(context, R.layout.activity_main, values);
         this.context = context;
         this.values = values;
@@ -39,7 +39,7 @@ public class ListAdapter extends ArrayAdapter<RunningAppProcessInfo> {
         View rowView = inflater.inflate(R.layout.activity_main, parent, false);
 
         TextView appName = (TextView) rowView.findViewById(R.id.appNameText);
-        appName.setText(values.get(position).processName);
+        appName.setText(values.get(position));
 
         return rowView;
     }
