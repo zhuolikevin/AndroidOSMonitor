@@ -19,7 +19,7 @@ import java.util.List;
 public class ListAdapter extends ArrayAdapter<String> {
     // List context
     private final Context context;
-    // List values
+    // List process ids and names
     private final List<String> values;
 
     public ListAdapter(Context context, List<String> values) {
