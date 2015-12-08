@@ -67,6 +67,15 @@ public class MainActivity extends ListActivity {
         float cpuUsage = readUsage();
         Log.d(TAG, "CPU usage: " + cpuUsage);
 
+        try {
+            RandomAccessFile reader = new RandomAccessFile("/proc/stat", "r");
+            String load = reader.readLine();
+            Log.d(TAG, load);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+
     }
 
     @Override
@@ -78,8 +87,41 @@ public class MainActivity extends ListActivity {
 //        Log.d(TAG, "This pid: " + pid);
 
 //        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        double cpuUsage = calculateCPUUsagebyProcess(pid);
 
-        Toast.makeText(getApplicationContext(), "PID " + pid, Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "PID " + pid + "\nCPU Usage: " + cpuUsage + "%", Toast.LENGTH_LONG).show();
+    }
+
+    private double calculateCPUUsagebyProcess(int pid) {
+        try {
+            RandomAccessFile uptimeReader = new RandomAccessFile("/proc/uptime", "r");
+            String uptimeLoad = uptimeReader.readLine().split(" ")[0];
+            float uptime = Float.parseFloat(uptimeLoad);
+            Log.d(TAG, "" + uptime);
+
+            RandomAccessFile reader = new RandomAccessFile("/proc/" + pid + "/stat", "r");
+            String[] load = reader.readLine().split(" ");
+            long utime = Long.parseLong(load[13]);
+            long stime = Long.parseLong(load[14]);
+            long starttime = Long.parseLong(load[21]);
+
+            Log.d(TAG, "" + utime + " " + stime + " " + starttime);
+
+            double seconds = uptime - (starttime / 100);
+            Log.d(TAG, "seconds: " + seconds);
+            double totalTime = utime + stime;
+            Log.d(TAG, "total time: " + totalTime);
+            Log.d(TAG, "" + totalTime / 100);
+            double cpuUsage = 100 * ((totalTime / 100) / seconds);
+            Log.d(TAG, "" + cpuUsage);
+            return cpuUsage;
+
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        return 0;
     }
 
     private float readUsage() {
