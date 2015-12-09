@@ -86,10 +86,13 @@ public class MainActivity extends ListActivity {
         Log.d(TAG, "on click: " + process);
 //        Log.d(TAG, "This pid: " + pid);
 
-//        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        int[] pids = {pid};
+        Debug.MemoryInfo[] memoryInfos = manager.getProcessMemoryInfo(pids);
+        int pss = memoryInfos[0].getTotalPss();
         double cpuUsage = calculateCPUUsagebyProcess(pid);
 
-        Toast.makeText(getApplicationContext(), "PID " + pid + "\nCPU Usage: " + cpuUsage + "%", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "PID " + pid + "\nCPU Usage: " + cpuUsage + "%\n" + "Memory Usage: " + pss/1024 + "MB", Toast.LENGTH_LONG).show();
     }
 
     private double calculateCPUUsagebyProcess(int pid) {
