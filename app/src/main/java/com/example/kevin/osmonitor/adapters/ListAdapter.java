@@ -2,7 +2,6 @@ package com.example.kevin.osmonitor.adapters;
 
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,13 +15,13 @@ import java.util.List;
 /**
  * Created by Kevin on 12/7/15.
  */
-public class ListAdapter extends ArrayAdapter<String> {
+public class ListAdapter extends ArrayAdapter<RunningAppProcessInfo> {
     // List context
     private final Context context;
     // List process ids and names
-    private final List<String> values;
+    private final List<RunningAppProcessInfo> values;
 
-    public ListAdapter(Context context, List<String> values) {
+    public ListAdapter(Context context, List<RunningAppProcessInfo> values) {
         super(context, R.layout.activity_main, values);
         this.context = context;
         this.values = values;
@@ -39,7 +38,7 @@ public class ListAdapter extends ArrayAdapter<String> {
         View rowView = inflater.inflate(R.layout.activity_main, parent, false);
 
         TextView appName = (TextView) rowView.findViewById(R.id.appNameText);
-        appName.setText(values.get(position));
+        appName.setText(values.get(position).processName);
 
         return rowView;
     }

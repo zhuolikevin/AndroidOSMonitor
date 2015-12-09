@@ -1,11 +1,12 @@
 package com.example.kevin.osmonitor;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ActivityManager.MemoryInfo;
 import android.app.ListActivity;
-import android.net.TrafficStats;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Debug;
 import android.util.Log;
@@ -17,8 +18,6 @@ import com.example.kevin.osmonitor.adapters.ListAdapter;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class MainActivity extends ListActivity {
@@ -27,7 +26,7 @@ public class MainActivity extends ListActivity {
 
 // private final ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 
-    private HashMap<String, Integer> processMap = new HashMap<String, Integer>();
+//    private HashMap<String, Integer> processMap = new HashMap<String, Integer>();
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,28 +34,13 @@ public class MainActivity extends ListActivity {
         //Get running process
         ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
         List<RunningAppProcessInfo> runningProcesses = manager.getRunningAppProcesses();
-        List<String> allProcesses = new ArrayList<String>();
 
         if (runningProcesses != null && runningProcesses.size() > 0) {
-            Log.d(TAG, "Current processes number" + runningProcesses.size());
-            for (RunningAppProcessInfo runningProcess: runningProcesses) {
-                allProcesses.add(runningProcess.processName);
-                processMap.put(runningProcess.processName, runningProcess.pid);
-            }
-
+            setListAdapter(new ListAdapter(this, runningProcesses));
+        } else {
+            // In case there are no processes running (not a chance :))
+            Toast.makeText(getApplicationContext(), "No application is running", Toast.LENGTH_LONG).show();
         }
-
-        List<ActivityManager.RunningServiceInfo> runningServiceInfos = manager.getRunningServices(Integer.MAX_VALUE);
-        Log.d(TAG, "running services : " + runningServiceInfos.size());
-        for (ActivityManager.RunningServiceInfo rsi: runningServiceInfos) {
-            Log.d(TAG, "Service pid: " + rsi.pid + " process name: " + rsi.process);
-            if (processMap.get(rsi.process) == null) {
-                allProcesses.add(rsi.process);
-            }
-            processMap.put(rsi.process, rsi.pid);
-        }
-
-        setListAdapter(new ListAdapter(this, allProcesses));
 
         // Get overall memory usage
         MemoryInfo mi = new MemoryInfo();
@@ -75,16 +59,17 @@ public class MainActivity extends ListActivity {
             ex.printStackTrace();
         }
 
+        float betterLevel = getBatteryLevel();
+        Log.d(TAG, "Current battery remain: " + betterLevel + "%");
 
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        String process = (String) getListAdapter().getItem(position);
-        int pid = processMap.get(process);
+//        String process = (String) getListAdapter().getItem(position);
+        int pid = ((RunningAppProcessInfo)getListAdapter().getItem(position)).pid;
 
-        Log.d(TAG, "on click: " + process);
-//        Log.d(TAG, "This pid: " + pid);
+//        Log.d(TAG, "on click: " + process);
 
         ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
         int[] pids = {pid};
@@ -159,5 +144,18 @@ public class MainActivity extends ListActivity {
         }
 
         return 0;
+    }
+
+    public float getBatteryLevel() {
+        Intent batteryIntent = registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+        // Error checking that probably isn't needed but I added just in case.
+        if(level == -1 || scale == -1) {
+            return 50.0f;
+        }
+
+        return ((float)level / (float)scale) * 100.0f;
     }
 }
