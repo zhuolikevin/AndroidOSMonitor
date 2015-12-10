@@ -12,9 +12,7 @@ import com.example.kevin.osmonitor.R;
 
 import java.util.List;
 
-/**
- * Created by Kevin on 12/7/15.
- */
+
 public class ListAdapter extends ArrayAdapter<RunningAppProcessInfo> {
     // List context
     private final Context context;
