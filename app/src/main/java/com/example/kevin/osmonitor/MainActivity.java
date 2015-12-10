@@ -49,7 +49,7 @@ public class MainActivity extends ListActivity {
         Log.d(TAG, "Total memory (MB): " + mi.totalMem / 1048576L);
 
         float cpuUsage = readUsage();
-        Log.d(TAG, "CPU usage: " + cpuUsage);
+        Log.d(TAG, "CPU usage: " + cpuUsage + "%");
 
         try {
             RandomAccessFile reader = new RandomAccessFile("/proc/stat", "r");
@@ -61,7 +61,6 @@ public class MainActivity extends ListActivity {
 
         float betterLevel = getBatteryLevel();
         Log.d(TAG, "Current battery remain: " + betterLevel + "%");
-
     }
 
     @Override
@@ -75,9 +74,15 @@ public class MainActivity extends ListActivity {
         int[] pids = {pid};
         Debug.MemoryInfo[] memoryInfos = manager.getProcessMemoryInfo(pids);
         int pss = memoryInfos[0].getTotalPss();
+        int clean = memoryInfos[0].getTotalPrivateClean();
+        int dirty = memoryInfos[0].getTotalPrivateDirty();
         double cpuUsage = calculateCPUUsagebyProcess(pid);
 
-        Toast.makeText(getApplicationContext(), "PID " + pid + "\nCPU Usage: " + cpuUsage + "%\n" + "Memory Usage: " + pss/1024 + "MB", Toast.LENGTH_LONG).show();
+        String line1 = "PID: " + pid + "\n";
+        String line2 = "CPU Usage: " + cpuUsage + "%\n";
+        String line3 = "Memory: " + pss/1024 + "MB / " + clean/1024 + "MB / " + dirty/1024 + "MB\n";
+
+        Toast.makeText(getApplicationContext(), line1 + line2 + line3, Toast.LENGTH_LONG).show();
     }
 
     private double calculateCPUUsagebyProcess(int pid) {
